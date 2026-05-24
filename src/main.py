@@ -92,7 +92,7 @@ def all_topologies_synthetic_demands():
         "demand_first_waypoints",
         "heur_ospf_weights",
         "inverse_capacity",
-        "sequential_combination",
+        # "sequential_combination",
         "ica_joint_heuristic",
     ]
     ilp_method = ""
@@ -148,7 +148,7 @@ def abilene_all_algorithms():
         ("demand_first_waypoints", ""),
         ("heur_ospf_weights", ""),
         ("inverse_capacity", ""),
-        ("sequential_combination", ""),
+        # ("sequential_combination", ""),
         ("uniform_weights", ""),
         ("ica_joint_heuristic", ""),
         ("segment_ilp", "WEIGHTS"),
@@ -204,7 +204,7 @@ def snd_real_demands():
         "demand_first_waypoints",
         "heur_ospf_weights",
         "inverse_capacity",
-        "sequential_combination",
+        # "sequential_combination",
         "ica_joint_heuristic",
     ]
     ilp_method = ""
