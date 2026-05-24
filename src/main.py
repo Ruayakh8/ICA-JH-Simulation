@@ -17,7 +17,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # demands settings
 SEED = 318924135
 DEMANDS_SAMPLES = 10
-ALGORITHM_TIME_OUT = 4 * 60 * 60  # 4 hours
+ALGORITHM_TIME_OUT = 1 * 60 * 60  # 1 hour
 ACTIVE_PAIRS_FRACTION = 0.2
 
 
@@ -151,9 +151,9 @@ def abilene_all_algorithms():
         # ("sequential_combination", ""),
         ("uniform_weights", ""),
         ("ica_joint_heuristic", ""),
-        ("segment_ilp", "WEIGHTS"),
-        ("segment_ilp", "WAYPOINTS"),
-        ("segment_ilp", "JOINT"),
+        # ("segment_ilp", "WEIGHTS"),
+        # ("segment_ilp", "WAYPOINTS"),
+        # ("segment_ilp", "JOINT"),
     ]
 
     # ILP solvers are only feasible on small topologies; larger ones exceed memory/time limits

@@ -199,8 +199,9 @@ class ICAJointHeuristic(GenericSR):
         total_demand = sum(d for _, _, d in self.__demands)
 
         best_mlu = mlu
+        best_wapl = wapl
         best_solution = dict(weights=dict(weights), waypoints=dict(waypoints),
-                             loads=dict(loads), objective=mlu)
+                             loads=dict(loads), objective=mlu, wapl=wapl)
 
         # ── Step 2: Iterative improvement loop ───────────────────────────────
         for _it in range(self.__max_iterations):
@@ -295,10 +296,12 @@ class ICAJointHeuristic(GenericSR):
                 # ── Step 7: Track best solution ───────────────────────────────
                 if mlu < best_mlu:
                     best_mlu = mlu
+                    best_wapl = wapl
                     best_solution = dict(weights=dict(weights),
                                         waypoints=dict(waypoints),
                                         loads=dict(loads),
-                                        objective=mlu)
+                                        objective=mlu,
+                                        wapl=wapl)
             else:
                 # No improvement in this full pass → early termination
                 break
