@@ -219,7 +219,7 @@ class HeurOSPFWeights(GenericSR):
 
     def __add_loads_for(self, t_idx, weights, demands, acc_flows, distances):
         """ Computes flow path from all sources to node t and returns the updated acc_flows dict"""
-        current_flows = np.zeros((self.__n, self.__n), np.float)
+        current_flows = np.zeros((self.__n, self.__n), float)
         t = self.__targets[t_idx]
         A_out = {y: list() for y in range(self.__n)}
         A_in = {y: list() for y in range(self.__n)}

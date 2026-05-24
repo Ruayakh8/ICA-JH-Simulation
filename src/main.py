@@ -6,18 +6,17 @@ import os
 
 from algorithm import sr_factory
 from demand import dp_factory
-from utility import utility
 from topology import topology_factory
 from utility.json_result_handler import JsonResultWriter
-from utility.utility import HIGHLIGHT, CEND, FAIL, error_solution, get_setup_dict, get_fpp
+from utility.utility import HIGHLIGHT, CEND, error_solution, get_setup_dict, get_fpp
 
-OUT_DIR = os.path.abspath("../out/")
-LOG_DIR = os.path.join(OUT_DIR, "log/")
+OUT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../out"))
+LOG_DIR = os.path.join(OUT_DIR, "log")
 
 # demands settings
 SEED = 318924135
-DEMANDS_SAMPLES = 10
-ALGORITHM_TIME_OUT = 3600 * 4
+DEMANDS_SAMPLES = 5
+ALGORITHM_TIME_OUT = 60 * 2  # 2 minutes
 ACTIVE_PAIRS_FRACTION = 0.2
 
 
@@ -83,9 +82,8 @@ def get_topology_generator(top_provider, tops_names, max_edges=None):
 
 
 def all_topologies_synthetic_demands():
-    """ Sets up tests using all topology data having complete link capacity data from SNDLib and TopologyZoo.
-    For these tests synthetic demands generated with MCF MAXIMAL are used.
-    Each test instance is executed on 4 heuristic algorithms """
+    """ Evaluates ICA-JH against baseline heuristics on the six SNDLib topologies
+    selected in the project proposal, using synthetic MCF MAXIMAL demands. """
 
     # algorithm settings
     algorithms = [
@@ -93,70 +91,21 @@ def all_topologies_synthetic_demands():
         "heur_ospf_weights",
         "inverse_capacity",
         "sequential_combination",
+        "ica_joint_heuristic",
     ]
     ilp_method = ""
 
-    # topology provider settings
+    # topology provider settings — proposal subset from SNDLib
     topology_map = {
-        # SNDLib with complete capacity information
         "snd_lib": [
-            "abilene",  #: |E|: 30 , |V|: 12
-            "polska",  #: |E|: 36 , |V|: 12
-            "nobel-us",  #: |E|: 42 , |V|: 14
-            "atlanta",  #: |E|: 44 , |V|: 15
-            "nobel-germany",  #: |E|: 52 , |V|: 17
-            "pdh",  #: |E|: 68 , |V|: 11
-            "geant",  #: |E|: 72 , |V|: 22
-            "nobel-eu",  #: |E|: 82 , |V|: 28
-            "di",  #: |E|: 84 , |V|: 11
-            "janos-us",  #: |E|: 84 , |V|: 26
-            "dfn-bwin",  #: |E|: 90 , |V|: 10
-            "france",  #: |E|: 90 , |V|: 25
-            "dfn-gwin",  #: |E|: 94 , |V|: 11
-            "newyork",  #: |E|: 98 , |V|: 16
-            "norway",  #: |E|: 102, |V|: 27
-            "sun",  #: |E|: 102, |V|: 27
-            "ta1",  #: |E|: 102, |V|: 24
-            "cost266",  #: |E|: 114, |V|: 37
-            "janos-us-ca",  #: |E|: 122, |V|: 39
-            "india35",  #: |E|: 160, |V|: 35
-            "zib54",  #: |E|: 160, |V|: 54
-            "giul39",  #: |E|: 172, |V|: 39
-            "germany50",  #: |E|: 176, |V|: 50
-            "pioro40",  #: |E|: 178, |V|: 40
-            "ta2",  #: |E|: 216, |V|: 65
-            "brain",  #: |E|: 332, |V|: 161
+            "abilene",   #: |E|: 30 , |V|: 12
+            "geant",     #: |E|: 72 , |V|: 22
+            "cost266",   #: |E|: 114, |V|: 37
+            "zib54",     #: |E|: 160, |V|: 54
+            "germany50", #: |E|: 176, |V|: 50
+            "ta2",       #: |E|: 216, |V|: 65
         ],
-
-        # TopologyZoo complete capacity information
-        "topology_zoo": [
-            "basnet",  #: |E|: 12 , |V|: 7
-            "cesnet1999",  #: |E|: 24 , |V|: 13
-            "kreonet",  #: |E|: 24 , |V|: 13
-            "eenet",  #: |E|: 26 , |V|: 13
-            "savvis",  #: |E|: 40 , |V|: 19
-            "atmnet",  #: |E|: 44 , |V|: 21
-            "uran",  #: |E|: 48 , |V|: 24
-            "amres",  #: |E|: 48 , |V|: 25
-            "karen",  #: |E|: 56 , |V|: 25
-            "rediris",  #: |E|: 62 , |V|: 19
-            "janetlense",  #: |E|: 68 , |V|: 20
-            "rnp",  #: |E|: 68 , |V|: 31
-            "kentmanjan2011",  #: |E|: 76 , |V|: 38
-            "myren",  #: |E|: 78 , |V|: 37
-            "belnet2006",  #: |E|: 82 , |V|: 23
-            "niif",  #: |E|: 82 , |V|: 36
-            "carnet",  #: |E|: 86 , |V|: 44
-            "sanet",  #: |E|: 90 , |V|: 43
-            "geant2009",  #: |E|: 104, |V|: 34
-            "renater2010",  #: |E|: 112, |V|: 43
-            "switchl3",  #: |E|: 126, |V|: 42
-        ]
     }
-
-    if not os.path.exists(os.path.join(utility.BASE_PATH_ZOO_TOPOLOGY, f"{topology_map['topology_zoo'][0].title()}.graphml")):
-        print(f"{FAIL}The data from TopologyZoo is not available - pls follow the instruction in README.md{CEND}")
-        return
 
     # demand provider settings
     mcf_method = "maximal"
@@ -189,8 +138,8 @@ def all_topologies_synthetic_demands():
 
 
 def abilene_all_algorithms():
-    """ Sets up tests for topology Abilene (snd_lib) and synthetic demands using MCF MAXIMAL.
-    Each test instance is executed on all available algorithms """
+    """ Sets up tests for the six proposal topologies (snd_lib) and synthetic demands using MCF MAXIMAL.
+    Each test instance is executed on all available heuristic algorithms. """
 
     # algorithm settings
     algorithms = [  # ("algorithm_name", "ilp_method")
@@ -199,14 +148,15 @@ def abilene_all_algorithms():
         ("inverse_capacity", ""),
         ("sequential_combination", ""),
         ("uniform_weights", ""),
-        ("segment_ilp", "WEIGHTS"),
-        ("segment_ilp", "WAYPOINTS"),
-        ("segment_ilp", "JOINT"),
+        ("ica_joint_heuristic", ""),
+        # ("segment_ilp", "WEIGHTS"),   # ILP — disabled per assignment instructions
+        # ("segment_ilp", "WAYPOINTS"),  # ILP — disabled per assignment instructions
+        # ("segment_ilp", "JOINT"),      # ILP — disabled per assignment instructions
     ]
 
-    # topology provider setup
+    # topology provider setup — proposal subset from SNDLib
     topology_provider = "snd_lib"
-    topologies = ['abilene']
+    topologies = ["abilene", "geant", "germany50", "cost266", "zib54", "ta2"]
     topology_generator = get_topology_generator(topology_provider, topologies)
 
     # demand provider setup
@@ -237,8 +187,9 @@ def abilene_all_algorithms():
 
 
 def snd_real_demands():
-    """ Sets up tests using topology and demand data from snd_lib. The demand data is scaled with MCF MAXIMAL CONCURRENT
-    Each test instance is executed  on 4 heuristic algorithms """
+    """ Sets up tests using topology and demand data from snd_lib. The demand data is scaled with MCF MAXIMAL CONCURRENT.
+    Topologies are limited to abilene, geant, and germany50 — the only SNDLib entries that
+    have real traffic matrices available in the dataset. """
 
     # algorithm settings
     algorithms = [
@@ -246,12 +197,13 @@ def snd_real_demands():
         "heur_ospf_weights",
         "inverse_capacity",
         "sequential_combination",
+        "ica_joint_heuristic",
     ]
     ilp_method = ""
 
-    # topology provider setup
+    # topology provider setup — restricted to topologies with real SNDLib demand matrices
     topology_provider = "snd_lib"
-    topologies = ['abilene', 'geant', 'germany50']
+    topologies = ["abilene", "geant", "germany50"]
     topology_generator = get_topology_generator(topology_provider, topologies)
 
     # demand provider setup

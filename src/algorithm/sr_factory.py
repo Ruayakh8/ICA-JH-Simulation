@@ -3,6 +3,7 @@
 from algorithm.generic_sr import GenericSR
 from algorithm.segment_routing.demand_first_waypoints import DemandsFirstWaypoints
 from algorithm.segment_routing.heur_ospf_weights import HeurOSPFWeights
+from algorithm.segment_routing.ica_joint_heuristic import ICAJointHeuristic
 from algorithm.segment_routing.inverse_capacity import InverseCapacity
 from algorithm.segment_routing.segment_ilp import SegmentILP
 from algorithm.segment_routing.sequential_combination import SequentialCombination
@@ -16,6 +17,8 @@ def get_algorithm(algorithm_name: str, nodes: list, links: list, demands: list, 
         algorithm = DemandsFirstWaypoints(nodes, links, demands, weights, waypoints)
     elif algorithm_name == "heur_ospf_weights":
         algorithm = HeurOSPFWeights(nodes, links, demands, weights, waypoints, seed=seed, time_out=time_out)
+    elif algorithm_name == "ica_joint_heuristic":
+        algorithm = ICAJointHeuristic(nodes, links, demands, weights, waypoints, seed=seed, time_out=time_out)
     elif algorithm_name == "inverse_capacity":
         algorithm = InverseCapacity(nodes, links, demands, weights, waypoints, seed=seed)
     elif algorithm_name == "segment_ilp":

@@ -43,7 +43,7 @@ class DemandsFirstWaypoints(GenericSR):
         return {(u, v): c for u, v, c in links}
 
     def __init_capacity_map(self):
-        self.__capacity_map = np.ones((self.__n, self.__n), np.float)
+        self.__capacity_map = np.ones((self.__n, self.__n), float)
         for u, v in self.__links:
             self.__capacity_map[u][v] = self.__capacities[u, v]
 
@@ -60,7 +60,7 @@ class DemandsFirstWaypoints(GenericSR):
         return self.__apsp.getDistances()
 
     def __get_shortest_path_fraction_map(self, distances):
-        link_fraction_map = np.zeros((self.__n, self.__n, self.__n, self.__n), np.float)
+        link_fraction_map = np.zeros((self.__n, self.__n, self.__n, self.__n), float)
 
         for s in range(self.__n):
             # iterate over nodes sorted by distance
@@ -69,7 +69,7 @@ class DemandsFirstWaypoints(GenericSR):
             for t in range(self.__n):
                 if s == t:
                     continue
-                node_fractions = np.zeros(self.__n, np.float)
+                node_fractions = np.zeros(self.__n, float)
                 node_fractions[s] = 1
 
                 for u_idx in range(self.__n - 1):
@@ -88,7 +88,7 @@ class DemandsFirstWaypoints(GenericSR):
         return link_fraction_map
 
     def __get_flow_map(self, sp_fraction_map):
-        flow_map = np.zeros((self.__n, self.__n), np.float)
+        flow_map = np.zeros((self.__n, self.__n), float)
         for s, t, d in self.__demands:
             flow_map += sp_fraction_map[s][t] * d
         return flow_map

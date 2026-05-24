@@ -19,10 +19,13 @@ MAX_THREADS_DP = 4
 LOGTOCONSOLE_DP = 0
 NON_CONVEX_DP = 0
 
-# DATA PATHS
-BASE_PATH_SNDLIB_DEMANDS = os.path.abspath("../data/demands/sndlib/")
-BASE_PATH_SNDLIB_TOPOLOGY = os.path.abspath("../data/topologies/sndlib/")
-BASE_PATH_ZOO_TOPOLOGY = os.path.abspath("../data/topologies/topology_zoo/")
+# DATA PATHS — anchored to this file's location so they resolve correctly
+# regardless of the working directory when the script is launched
+_UTILITY_DIR = os.path.dirname(os.path.abspath(__file__))  # .../src/utility/
+_DATA_ROOT = os.path.normpath(os.path.join(_UTILITY_DIR, "../../../data"))
+BASE_PATH_SNDLIB_DEMANDS = os.path.join(_DATA_ROOT, "demands", "sndlib")
+BASE_PATH_SNDLIB_TOPOLOGY = os.path.join(_DATA_ROOT, "topologies", "sndlib")
+BASE_PATH_ZOO_TOPOLOGY = os.path.join(_DATA_ROOT, "topologies", "topology_zoo", "archive")
 
 
 def create_dirs(path: str):
