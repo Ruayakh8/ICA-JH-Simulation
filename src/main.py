@@ -12,11 +12,12 @@ from utility.utility import HIGHLIGHT, CEND, error_solution, get_setup_dict, get
 
 OUT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "../out"))
 LOG_DIR = os.path.join(OUT_DIR, "log")
+os.makedirs(LOG_DIR, exist_ok=True)
 
 # demands settings
 SEED = 318924135
-DEMANDS_SAMPLES = 5
-ALGORITHM_TIME_OUT = 60 * 2  # 2 minutes
+DEMANDS_SAMPLES = 10
+ALGORITHM_TIME_OUT = 4 * 60 * 60  # 4 hours
 ACTIVE_PAIRS_FRACTION = 0.2
 
 
@@ -38,7 +39,8 @@ def work(algorithm_name, links, n, demands, ilp_method, setup, time_out, res_han
         result_dict.update(err_solution)
         print(f"{HIGHLIGHT}Error on: {setup}\n msg: {str(ex)}{CEND}")
     res_handler.insert_result(result_dict)
-    return success, result_dict["objective"]
+    wapl = result_dict.get("wapl", 0.0)
+    return success, result_dict["objective"], wapl
 
 
 def get_demands_generator_mcf_maximal(n, links, active_pairs_fraction, seed):
@@ -129,10 +131,10 @@ def all_topologies_synthetic_demands():
                                            topology, topology_provider, ACTIVE_PAIRS_FRACTION, mcf_method, SEED)
 
                     print(f"submit test: {test_idx} ({topology}, {algorithm}, D_idx = {sample_idx})")
-                    success, objective = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                              ALGORITHM_TIME_OUT, result_handler)
+                    success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
+                                                    ALGORITHM_TIME_OUT, result_handler)
                     print(f"Test-ID: {test_idx}, success: {success} [{algorithm}, "
-                          f"{topology}, {sample_idx}]: objective: {round(objective, 4)}")
+                          f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                     test_idx += 1
     return
 
@@ -149,10 +151,13 @@ def abilene_all_algorithms():
         ("sequential_combination", ""),
         ("uniform_weights", ""),
         ("ica_joint_heuristic", ""),
-        # ("segment_ilp", "WEIGHTS"),   # ILP — disabled per assignment instructions
-        # ("segment_ilp", "WAYPOINTS"),  # ILP — disabled per assignment instructions
-        # ("segment_ilp", "JOINT"),      # ILP — disabled per assignment instructions
+        ("segment_ilp", "WEIGHTS"),
+        ("segment_ilp", "WAYPOINTS"),
+        ("segment_ilp", "JOINT"),
     ]
+
+    # ILP solvers are only feasible on small topologies; larger ones exceed memory/time limits
+    ILP_SAFE_TOPOLOGIES = {"abilene", "geant"}
 
     # topology provider setup — proposal subset from SNDLib
     topology_provider = "snd_lib"
@@ -174,14 +179,17 @@ def abilene_all_algorithms():
         for demands, demands_provider, sample_idx in demands_generator:
             # perform each test instance on each algorithm
             for algorithm, ilp_method in algorithms:
+                if algorithm == "segment_ilp" and topology not in ILP_SAFE_TOPOLOGIES:
+                    continue
+
                 setup = get_setup_dict(algorithm, demands, demands_provider, links, ilp_method, n, sample_idx, test_idx,
                                        topology, topology_provider, ACTIVE_PAIRS_FRACTION, mcf_method, SEED)
 
                 print(f"submit test: {test_idx} ({topology}, {algorithm} {ilp_method}, D_idx = {sample_idx})")
-                success, objective = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                          ALGORITHM_TIME_OUT, result_handler)
+                success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
+                                                ALGORITHM_TIME_OUT, result_handler)
                 print(f"Test-ID: {test_idx}, success: {success} [{algorithm} {ilp_method}, "
-                      f"{topology}, {sample_idx}]: objective: {round(objective, 4)}")
+                      f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                 test_idx += 1
     return
 
@@ -224,10 +232,10 @@ def snd_real_demands():
                                        topology, topology_provider, 1, mcf_method, SEED)
 
                 print(f"submit test: {test_idx} ({topology}, {algorithm}, D_idx = {sample_idx})")
-                success, objective = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                          ALGORITHM_TIME_OUT, result_handler)
+                success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
+                                                ALGORITHM_TIME_OUT, result_handler)
                 print(f"Test-ID: {test_idx}, success: {success} [{algorithm}, "
-                      f"{topology}, {sample_idx}]: objective: {round(objective, 4)}")
+                      f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                 test_idx += 1
     return
 
