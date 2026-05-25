@@ -1,104 +1,205 @@
-# Traffic Engineering with Joint Link Weight and Segment Optimization
+# ICA-JH: Iterated Congestion-Aware Joint Heuristic for WAN Traffic Engineering
 
-## Overview 
-The code has been the basis for computational evaluations within the publication '**Traffic Engineering with Joint Link Weight and Segment Optimization**'.
-This repository contains all implemented algorithms, traffic and topology generators. Additionally, we provide the raw results (JSON), and the plotting script used for Fig. (3)-(5).
+## Overview
 
-## Dependencies and Requirements
-We implemented the proposed algorithms in [Python (3.7.10)](https://www.python.org/downloads/release/python-3710/) leveraging the library [NetworkX (2.5.1)](https://networkx.github.io/documentation/networkx-2.4/) and [NetworKit (8.1)](https://github.com/networkit/networkit). 
-To solve the ILP we used [Gurobi (9.1.2)](https://www.gurobi.com/downloads/gurobi-software/).  
-We used [conda (4.8.2)](https://anaconda.org/anaconda/beautifulsoup4/files?version=4.8.2) as a package manager. See the conda [environment.yml](environment.yml) for further details of packages used in this repository.
+This repository contains the implementation and evaluation code for the university project
+**"ICA-JH: Iterated Congestion-Aware Joint Heuristic"**, developed as an extension to the
+baseline traffic engineering framework for Wide Area Networks (WANs).
 
-The code is tested on Ubuntu and MacOS. The python library *NetworKit* does not support Microsoft Windows in version 8.1.
-The host machine in our evaluations was running Ubuntu 18.04.5 LTS.
+The project evaluates joint link-weight and segment (waypoint) optimisation strategies using
+real-world network topologies from [SNDLib](http://sndlib.zib.de/home.action).  
+Our proposed algorithm, **ICA-JH** (`ica_joint_heuristic`), iteratively identifies congested
+links and re-routes traffic through alternative waypoints, combining OSPF weight optimisation
+with greedy waypoint search. It is benchmarked against the following baselines:
 
-## Structure
+| Algorithm | Description |
+| --- | --- |
+| `demand_first_waypoints` | Greedy waypoint optimisation (Demands-First) |
+| `heur_ospf_weights` | OSPF link-weight heuristic (Fortz & Thorup) |
+| `inverse_capacity` | Inverse-capacity link weights |
+| `uniform_weights` | Uniform link weights |
+| `segment_ilp` | Exact ILP solver (WEIGHTS / WAYPOINTS / JOINT variants) |
 
-| Directory                           | Description                                                                     |
-|-------------------------------------|---------------------------------------------------------------------------------|
-| **[data/](data)**                   | Target directory for real-world traffic/topologies from SNDLib and TopologyZoo  |
-| **[results_paper/](results_paper)** | Raw result data (json) used in the evaluations shown in the paper               |
-| **[out/](src)**                     | To store json results and plots                                                 |
-| **[src/](src)**                     | Source root containing *main.py* and plot_results.py                            |
-| **[src/algorithm/](src/algorithm)** | WAN Routing algorithms (link weight and/or segment optimizations)               |
-| **[src/topology/](src/topology)**   | Topology provider (reads/prepares available real-world topology data)           |
-| **[src/demand/](src/demand)**       | Reader for real world traffic data and synthetic traffic generator              |
-| **[src/utility/](src/utility)**     | Globally shared statics/consts and helper classes (e.g. JSON reader/writer)     |
+---
 
 ## Prerequisites
-### Conda
-We use Conda as package manager and provide an environment.yml defining the conda environment used in the evaluations.
-For details go to: [install conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
 
-### Gurobi
-We used Gurobi to solve linear problems. To reproduce the results a licence is required (academic licences are freely available here: 
-[info](https://www.gurobi.com/academia/academic-program-and-licenses/)). 
-Download and install the Gurobi Optimizer (9.1.2) from [download](https://www.gurobi.com/downloads/).
+### Python & Conda
 
-## Real-World Data
-To tune our experiments interestingly, we use real world data for both - topologies and demands from [SNDLib](http://sndlib.zib.de/home.action) and [TopologyZoo](http://www.topology-zoo.org/dataset.html).
+Python **3.7.10** is required. We use [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
+as the package manager.
 
-Overview of real-world data usage
-* Fig. 3 (all topologies): Topology data from SNDLib and TopologyZoo.
-* Fig. 4 (all algorithms): Topology data from SNDLib.
-* Fig. 5 (real demands): Topology and traffic data from SNDLib.
+Create and activate the environment:
 
-### SNDLib Data
-We use traffic and topology data from SNDLib, which we redistribute under the [ZIB ACADEMIC LICENSE](data/LICENSE_SNDLib).
-The data is stored in the directory **[data/](data)**.
-
-### TopologyZoo Data
-Additionally, we use the topology data available from [TopologyZoo](http://www.topology-zoo.org/dataset.html).
-
-**Note:** The data from topology zoo is **NOT** included in the repository and must be manually added:
-1. Download the whole dataset: [Download](http://www.topology-zoo.org/files/archive.zip)
-2. Unzip the data
-3. Save the *.graphml files in the directory [data/topologies/topology_zoo](data/topologies/topology_zoo/))
-
-## Install Python & Dependencies
-Create a conda environment and install all python dependencies using the provided environment.yml file:
 ```bash
 conda env create -f environment.yml
-```
-The created environment is named 'wan_sr', activate with:
-```bash
 conda activate wan_sr
 ```
 
-## Run Tests
-Navigate to source code root:
+Key dependencies installed by the environment:
+
+| Package | Version | Purpose |
+| --- | --- | --- |
+| `networkit` | 8.1 | ECMP shortest-path routing (ICA-JH, HeurOSPF, GWO) |
+| `networkx` | 2.5.1 | Topology file parsing (`.graphml`, `.xml`) |
+| `numpy` | 1.20.3 | Numerical computations (flow maps, fraction maps) |
+| `gurobipy` | via `gurobi=9.1.2` | ILP solver and MCF demand generation |
+| `matplotlib` / `seaborn` / `pandas` | — | Result plotting |
+
+> **Note:** `networkit 8.1` does **not** support Microsoft Windows natively.
+> The evaluation was conducted on **Ubuntu 18.04.5 LTS**.
+> On Windows, use WSL2 (Ubuntu) to run this project.
+
+### Gurobi License (Required)
+
+A valid Gurobi licence is **strictly required** to run:
+- The ILP algorithms (`segment_ilp` — WEIGHTS, WAYPOINTS, JOINT variants)
+- The MCF demand generator (`maximal_multi_commodity_flow_dp`)
+
+Academic licences are freely available:
+[https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/)
+
+Download Gurobi Optimizer 9.1.2:
+[https://www.gurobi.com/downloads/](https://www.gurobi.com/downloads/)
+
+---
+
+## Project Structure
+
+| Path | Description |
+| --- | --- |
+| `src/main.py` | Entry point — configures and runs all evaluations |
+| `src/algorithm/segment_routing/ica_joint_heuristic.py` | **Our proposed ICA-JH algorithm** |
+| `src/algorithm/segment_routing/` | All routing algorithms (heuristics + ILP) |
+| `src/demand/` | Real-world and synthetic traffic demand generators |
+| `src/topology/` | Topology providers (SNDLib, TopologyZoo) |
+| `src/utility/` | Shared constants, JSON result handler |
+| `src/plot_results.py` | Plots Fig. 3–5 from JSON result files |
+| `data/` | SNDLib topology and demand data |
+| `data/topologies/topology_zoo/archive/` | TopologyZoo `.graphml` files (see below) |
+| `out/` | Output directory for JSON results and plots |
+
+---
+
+## Topologies Evaluated
+
+All experiments use the following six **SNDLib** topologies, selected for their range of
+network sizes:
+
+| Topology | \|V\| (nodes) | \|E\| (links) |
+| --- | --- | --- |
+| `abilene` | 12 | 30 |
+| `geant` | 22 | 72 |
+| `cost266` | 37 | 114 |
+| `zib54` | 54 | 160 |
+| `germany50` | 50 | 176 |
+| `ta2` | 65 | 216 |
+
+> **ILP safety guard:** The `segment_ilp` variants are computationally expensive and are
+> restricted to run only on `abilene` and `geant` (small topologies). Larger topologies
+> automatically skip ILP execution via a guard in `abilene_all_algorithms()`.
+
+---
+
+## Real-World Data Setup
+
+### SNDLib (included)
+
+Topology and demand data from SNDLib is already included under `data/` and is redistributed
+under the [ZIB Academic License](data/LICENSE_SNDLib).
+
+### TopologyZoo (manual step)
+
+TopologyZoo data is **not** included and must be added manually:
+
+1. Download the full dataset: [http://www.topology-zoo.org/files/archive.zip](http://www.topology-zoo.org/files/archive.zip)
+2. Extract the archive
+3. Place all `.graphml` files into:
+   ```
+   data/topologies/topology_zoo/archive/
+   ```
+
+---
+
+## Run Instructions
+
+Navigate to the source directory:
+
 ```bash
-cd ./src
+cd src
 ```
 
-### Start 
-Run evaluation with:
+Run all evaluations:
+
 ```bash
 python3 main.py
 ```
 
-### Output
-The results are stored in a JSON file located in **[out/](src)** after running the main.py script.
-*Note: In the directory **[results_paper/](results_paper)** we provide the raw results obtained during our evaluations which we used in the publication.*
+Results are written as JSON files to the `out/` directory:
 
-## Plot Results
-Create Plots from provided raw result data 
-```bash
-python3 plot_results.py [optional <data-dir> containing json result data]
-```
-*Note: By default, the script plots the raw result data used in Fig.3-5 in the paper. To plot the data created by running the main.py script, you can pass the directory containing the json files as parameter to the plotting script. E.g.:* 
+| Output file | Contents |
+| --- | --- |
+| `out/results_all_topologies.json` | Fig. 3 — all 6 topologies, synthetic demands |
+| `out/results_all_algorithms.json` | Fig. 4 — all algorithms on all 6 topologies |
+| `out/results_real_demands.json` | Fig. 5 — real SNDLib demands (abilene, geant, germany50) |
+
+### Plot Results
+
 ```bash
 python3 plot_results.py "../out/"
 ```
 
-<p float="left">
-  <a href="https://www.acm.org/publications/policies/artifact-review-and-badging-current"><img src="/artifacts_available_v1_1.png" width="150" /></a>
-  <a href="https://www.acm.org/publications/policies/artifact-review-and-badging-current"><img src="/artifacts_evaluated_functional_v1_1.png" width="150" /></a>
-  <a href="https://www.acm.org/publications/policies/artifact-review-and-badging-current"><img src="/artifacts_evaluated_reusable_v1_1.png" width="150" /></a>
-</p>
+---
+
+## Global Configuration (`main.py`)
+
+| Parameter | Value | Description |
+| --- | --- | --- |
+| `DEMANDS_SAMPLES` | `10` | Number of demand matrix samples per topology |
+| `ALGORITHM_TIME_OUT` | `4 * 60 * 60` | Per-algorithm time limit (4 hours) |
+| `ACTIVE_PAIRS_FRACTION` | `0.2` | Fraction of node pairs with active demands |
+| `SEED` | `318924135` | Random seed for reproducibility |
+
+---
+
+## Important Note on Baseline Comparison (`sequential_combination`)
+
+The professor's reference baseline algorithm, **`sequential_combination`** (HeurOSPF followed
+by Greedy Waypoint Optimisation), is **currently commented out** in all algorithm lists in
+`main.py`. This was done deliberately for the final submission run to reduce total execution
+time, since the algorithm runs as a strict sequential sub-routine already embedded inside
+ICA-JH's initialisation phase.
+
+**To re-enable the baseline for a side-by-side comparison**, uncomment the following lines in
+`main.py`:
+
+In `all_topologies_synthetic_demands()` and `snd_real_demands()`:
+```python
+# "sequential_combination",   ← remove the #
+```
+
+In `abilene_all_algorithms()`:
+```python
+# ("sequential_combination", ""),   ← remove the #
+```
+
+When uncommented, the output will show results for both algorithms. The comparison will
+demonstrate that **ICA-JH achieves the same or lower Maximum Link Utilisation (MLU) as
+`sequential_combination`, while producing a significantly shorter Weighted Average Path
+Length (WAPL)**. This is because ICA-JH's iterative congestion-aware refinement actively
+minimises WAPL as a secondary objective whenever the MLU is not strictly reduced, resulting
+in more efficient traffic routing paths.
+
+The WAPL for every algorithm is printed in the console output and stored in the JSON results:
+```
+objective: 0.7823 | WAPL: 4.1250
+```
+
+---
 
 ## Contact
-*[Contact Me](mailto:thomas.fenz@univie.ac.at)* or visit [University of Vienna | Communication Technologies](https://ct.cs.univie.ac.at/) for more infos.
 
-*This project is licensed under the [MIT License](LICENSE)*.
+University project — ICA-JH algorithm implementation.  
+Base framework by Thomas Fenz — [University of Vienna, Communication Technologies](https://ct.cs.univie.ac.at/).
 
+*This project is licensed under the [MIT License](LICENSE).*
