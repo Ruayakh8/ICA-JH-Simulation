@@ -1,3 +1,5 @@
+import networkit as nk
+
 from algorithm.generic_sr import GenericSR
 
 
@@ -46,6 +48,30 @@ class SequentialCombination(GenericSR):
         solution["waypoints"] = solution_second["waypoints"]
         solution["weights"] = solution_second["weights"]
         solution["loads"] = solution_second["loads"]
+
+        # Compute WAPL from the final weights and waypoints produced by the second algorithm
+        final_weights = solution_second["weights"]
+        final_waypoints = solution_second["waypoints"]
+        n = len(self.__nodes)
+        link_list = [(u, v) for u, v, _ in self.__links]
+
+        g = nk.Graph(weighted=True, directed=True, n=n)
+        for u, v in link_list:
+            g.addEdge(u, v, final_weights[(u, v)])
+        apsp = nk.distance.APSP(g)
+        apsp.run()
+        distances = apsp.getDistances()
+
+        total_d = sum(d for _, _, d in self.__demands)
+        if total_d > 0:
+            wsum = sum(
+                d * sum(distances[p][q] for p, q in final_waypoints.get(idx, [(s, t)]))
+                for idx, (s, t, d) in enumerate(self.__demands)
+            )
+            solution["wapl"] = wsum / total_d
+        else:
+            solution["wapl"] = 0.0
+
         return solution
 
     def get_name(self):

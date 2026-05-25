@@ -17,7 +17,7 @@ os.makedirs(LOG_DIR, exist_ok=True)
 # demands settings
 SEED = 318924135
 DEMANDS_SAMPLES = 10
-ALGORITHM_TIME_OUT = 4 * 60 * 60  # 4 hours
+ALGORITHM_TIME_OUT = 4 * 60 * 60  # 4 hour 
 ACTIVE_PAIRS_FRACTION = 0.2
 
 
