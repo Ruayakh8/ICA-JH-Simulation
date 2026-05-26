@@ -26,8 +26,19 @@ with greedy waypoint search. It is benchmarked against the following baselines:
 
 ### Python & Conda
 
-Python **3.7.10** is required. We use [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/)
-as the package manager.
+| | Version |
+| --- | --- |
+| **Official / recommended** | Python **3.7.10** |
+| **Tested and working** | Python **3.10.x** (e.g. 3.10.11) |
+
+The project is officially configured for **Python 3.7.10**, as specified in `environment.yml`.
+This version ensures stable compatibility between the critical pinned packages `gurobi=9.1.2`
+and `networkit=8.1`. Deviating from this version may cause dependency conflicts.
+
+The simulation has also been thoroughly tested and runs successfully on **Python 3.10**.
+
+We use [Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/) as the
+package manager.
 
 Create and activate the environment:
 
@@ -53,6 +64,7 @@ Key dependencies installed by the environment:
 ### Gurobi License (Required)
 
 A valid Gurobi licence is **strictly required** to run:
+
 - The ILP algorithms (`segment_ilp` — WEIGHTS, WAYPOINTS, JOINT variants)
 - The MCF demand generator (`maximal_multi_commodity_flow_dp`)
 
@@ -115,7 +127,8 @@ TopologyZoo data is **not** included and must be added manually:
 1. Download the full dataset: [http://www.topology-zoo.org/files/archive.zip](http://www.topology-zoo.org/files/archive.zip)
 2. Extract the archive
 3. Place all `.graphml` files into:
-   ```
+
+   ```text
    data/topologies/topology_zoo/archive/
    ```
 
@@ -174,11 +187,13 @@ ICA-JH's initialisation phase.
 `main.py`:
 
 In `all_topologies_synthetic_demands()` and `snd_real_demands()`:
+
 ```python
 # "sequential_combination",   ← remove the #
 ```
 
 In `abilene_all_algorithms()`:
+
 ```python
 # ("sequential_combination", ""),   ← remove the #
 ```
@@ -191,7 +206,8 @@ minimises WAPL as a secondary objective whenever the MLU is not strictly reduced
 in more efficient traffic routing paths.
 
 The WAPL for every algorithm is printed in the console output and stored in the JSON results:
-```
+
+```text
 objective: 0.7823 | WAPL: 4.1250
 ```
 
