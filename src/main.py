@@ -131,9 +131,8 @@ def all_topologies_synthetic_demands():
                                            topology, topology_provider, ACTIVE_PAIRS_FRACTION, mcf_method, SEED)
 
                     print(f"submit test: {test_idx} ({topology}, {algorithm}, D_idx = {sample_idx})")
-                    time_out = 300 if algorithm == "segment_ilp" else ALGORITHM_TIME_OUT
                     success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                                    time_out, result_handler)
+                                                    ALGORITHM_TIME_OUT, result_handler)
                     print(f"Test-ID: {test_idx}, success: {success} [{algorithm}, "
                           f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                     test_idx += 1
@@ -157,12 +156,9 @@ def abilene_all_algorithms():
         ("segment_ilp", "JOINT"),
     ]
 
-    # ILP solvers are only feasible on small topologies; larger ones exceed memory/time limits
-    ILP_SAFE_TOPOLOGIES = {"abilene", "geant"}
-
     # topology provider setup — proposal subset from SNDLib
     topology_provider = "snd_lib"
-    topologies = ["germany50", "geant", "ta2", "cost266", "abilene", "zib54"]
+    topologies = ["abilene"]
     topology_generator = get_topology_generator(topology_provider, topologies)
 
     # demand provider setup
@@ -180,16 +176,12 @@ def abilene_all_algorithms():
         for demands, demands_provider, sample_idx in demands_generator:
             # perform each test instance on each algorithm
             for algorithm, ilp_method in algorithms:
-                if algorithm == "segment_ilp" and topology not in ILP_SAFE_TOPOLOGIES:
-                    continue
-
                 setup = get_setup_dict(algorithm, demands, demands_provider, links, ilp_method, n, sample_idx, test_idx,
                                        topology, topology_provider, ACTIVE_PAIRS_FRACTION, mcf_method, SEED)
 
                 print(f"submit test: {test_idx} ({topology}, {algorithm} {ilp_method}, D_idx = {sample_idx})")
-                time_out = 300 if algorithm == "segment_ilp" else ALGORITHM_TIME_OUT
                 success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                                time_out, result_handler)
+                                                ALGORITHM_TIME_OUT, result_handler)
                 print(f"Test-ID: {test_idx}, success: {success} [{algorithm} {ilp_method}, "
                       f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                 test_idx += 1
@@ -234,9 +226,8 @@ def snd_real_demands():
                                        topology, topology_provider, 1, mcf_method, SEED)
 
                 print(f"submit test: {test_idx} ({topology}, {algorithm}, D_idx = {sample_idx})")
-                time_out = 300 if algorithm == "segment_ilp" else ALGORITHM_TIME_OUT
                 success, objective, wapl = work(algorithm, links.copy(), n, demands.copy(), ilp_method, setup,
-                                                time_out, result_handler)
+                                                ALGORITHM_TIME_OUT, result_handler)
                 print(f"Test-ID: {test_idx}, success: {success} [{algorithm}, "
                       f"{topology}, {sample_idx}]: objective: {round(objective, 4)} | WAPL: {round(wapl, 4)}")
                 test_idx += 1
