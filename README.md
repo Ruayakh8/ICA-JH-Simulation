@@ -68,9 +68,6 @@ A valid Gurobi licence is **strictly required** to run:
 - The ILP algorithms (`segment_ilp` — WEIGHTS, WAYPOINTS, JOINT variants)
 - The MCF demand generator (`maximal_multi_commodity_flow_dp`)
 
-Academic licences are freely available:
-[https://www.gurobi.com/academia/academic-program-and-licenses/](https://www.gurobi.com/academia/academic-program-and-licenses/)
-
 Download Gurobi Optimizer 9.1.2:
 [https://www.gurobi.com/downloads/](https://www.gurobi.com/downloads/)
 
@@ -88,28 +85,8 @@ Download Gurobi Optimizer 9.1.2:
 | `src/utility/` | Shared constants, JSON result handler |
 | `src/plot_results.py` | Plots Fig. 3–5 from JSON result files |
 | `data/` | SNDLib topology and demand data |
-| `data/topologies/topology_zoo/archive/` | TopologyZoo `.graphml` files (see below) |
+| `data/topologies/topology_zoo/archive/` | TopologyZoo `.graphml` files |
 | `out/` | Output directory for JSON results and plots |
-
----
-
-## Topologies Evaluated
-
-All experiments use the following six **SNDLib** topologies, selected for their range of
-network sizes:
-
-| Topology | \|V\| (nodes) | \|E\| (links) |
-| --- | --- | --- |
-| `abilene` | 12 | 30 |
-| `geant` | 22 | 72 |
-| `cost266` | 37 | 114 |
-| `zib54` | 54 | 160 |
-| `germany50` | 50 | 176 |
-| `ta2` | 65 | 216 |
-
-> **ILP safety guard:** The `segment_ilp` variants are computationally expensive and are
-> restricted to run only on `abilene` and `geant` (small topologies). Larger topologies
-> automatically skip ILP execution via a guard in `abilene_all_algorithms()`.
 
 ---
 
@@ -117,8 +94,7 @@ network sizes:
 
 ### SNDLib (included)
 
-Topology and demand data from SNDLib is already included under `data/` and is redistributed
-under the [ZIB Academic License](data/LICENSE_SNDLib).
+Topology and demand data from SNDLib is already included under `data/`.
 
 ### TopologyZoo (manual step)
 
@@ -213,9 +189,10 @@ objective: 0.7823 | WAPL: 4.1250
 
 ---
 
-## Contact
+## Acknowledgements & Base Framework
 
-University project — ICA-JH algorithm implementation.  
-Base framework by Thomas Fenz — [University of Vienna, Communication Technologies](https://ct.cs.univie.ac.at/).
+This project was developed as part of our Informatics coursework at TU Dortmund. We utilized the original repository provided by our professor as the foundational framework. From there, we extended the codebase and implemented our own modifications—specifically the **ICA-JH** algorithm—to suit our core project idea and optimization goals.
+
+Base framework originally by Thomas Fenz — [University of Vienna, Communication Technologies](https://ct.cs.univie.ac.at/).
 
 *This project is licensed under the [MIT License](LICENSE).*

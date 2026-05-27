@@ -6,13 +6,13 @@ channels:
 dependencies:
   - python
   - numpy=1.20.3
-  - networkit       # graph algorithms and ECMP routing (ICA-JH, HeurOSPF, GWO)
-  - networkx=2.5.1       # topology parsing (.graphml files)
+  - networkit       
+  - networkx=2.5.1       
   - scipy=1.6.3
   - matplotlib
   - seaborn
   - pandas=1.3.3
-  - gurobi        # installs gurobipy; required for segment_ilp and MCF demand generation
+  - gurobi        
   - pip
   - pip:
       - gurobipy          # explicit pip fallback if gurobi conda package is unavailable

@@ -34,6 +34,7 @@ algo_c_map = {
     'GreedyWaypoints': "hotpink",
     'ILP Waypoints': "mediumvioletred",
     'JointHeur': "seagreen",
+    'ICA Joint': "darkorange",
     'ILP Joint': "darkgreen",
 }
 
@@ -118,6 +119,8 @@ def add_vertical_algorithm_labels(ax):
 def create_box_plot(df_plot, x, y, hue, file_name, x_label="", y_label="", fig_size=None,
                     title=None, y_lim_top=None):
     """ Setup and perform matplotlib boxplot"""
+    if df_plot.empty:
+        return
     fig, ax = plt.subplots(figsize=fig_size)
 
     flier_props = dict(markersize=1, linestyle='none')
@@ -222,6 +225,7 @@ def prepare_data_and_plot(df, title, plot_type):
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("SegmentIlp", "ILP")
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("DemandFirstWaypoints", "GreedyWaypoints")
     df["algorithm_complete"] = df["algorithm_complete"].str.replace("SequentialCombination", "JointHeur")
+    df["algorithm_complete"] = df["algorithm_complete"].str.replace("IcaJointHeuristic", "ICA Joint")
 
     # beautify topology names
     df["topology_name"] = df["topology_name"].apply(lambda x: top_n_map[x])

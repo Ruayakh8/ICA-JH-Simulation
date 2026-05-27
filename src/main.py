@@ -92,12 +92,12 @@ def all_topologies_synthetic_demands():
         "demand_first_waypoints",
         "heur_ospf_weights",
         "inverse_capacity",
-        # "sequential_combination",
+        # "sequential_combination", 
         "ica_joint_heuristic",
     ]
     ilp_method = ""
 
-    # topology provider settings — proposal subset from SNDLib
+    # topology provider settings
     topology_map = {
         "snd_lib": [
             "abilene",   #: |E|: 30 , |V|: 12
@@ -116,7 +116,6 @@ def all_topologies_synthetic_demands():
     result_handler = JsonResultWriter(result_filename, overwrite=True)
 
     test_idx = 0
-    # for each source of topology (SNDLib and TopologyZoo)
     for topology_provider in topology_map:
         topologies = topology_map[topology_provider]
         topology_generator = get_topology_generator(topology_provider, topologies)
@@ -140,8 +139,6 @@ def all_topologies_synthetic_demands():
 
 
 def abilene_all_algorithms():
-    """ Sets up tests for the six proposal topologies (snd_lib) and synthetic demands using MCF MAXIMAL.
-    Each test instance is executed on all available heuristic algorithms. """
 
     # algorithm settings
     algorithms = [  # ("algorithm_name", "ilp_method")
@@ -156,7 +153,7 @@ def abilene_all_algorithms():
         ("segment_ilp", "JOINT"),
     ]
 
-    # topology provider setup — proposal subset from SNDLib
+    # topology provider setup 
     topology_provider = "snd_lib"
     topologies = ["abilene"]
     topology_generator = get_topology_generator(topology_provider, topologies)
@@ -168,7 +165,6 @@ def abilene_all_algorithms():
     result_filename = os.path.join(OUT_DIR, "results_all_algorithms.json")
     result_handler = JsonResultWriter(result_filename, overwrite=True)
 
-    # fetch data for test instance and perform test
     test_idx = 0
     for links, n, topology in topology_generator:
         # setup topology specific demand generator and iterate over 10 samples of demands
@@ -189,10 +185,7 @@ def abilene_all_algorithms():
 
 
 def snd_real_demands():
-    """ Sets up tests using topology and demand data from snd_lib. The demand data is scaled with MCF MAXIMAL CONCURRENT.
-    Topologies are limited to abilene, geant, and germany50 — the only SNDLib entries that
-    have real traffic matrices available in the dataset. """
-
+   
     # algorithm settings
     algorithms = [
         "demand_first_waypoints",
@@ -203,24 +196,19 @@ def snd_real_demands():
     ]
     ilp_method = ""
 
-    # topology provider setup — restricted to topologies with real SNDLib demand matrices
     topology_provider = "snd_lib"
     topologies = ["abilene", "geant", "germany50"]
     topology_generator = get_topology_generator(topology_provider, topologies)
 
-    # demand provider setup
     mcf_method = "maximal_concurrent"
 
-    # setup result handler
     result_filename = os.path.join(OUT_DIR, "results_real_demands.json")
     result_handler = JsonResultWriter(result_filename, overwrite=True)
 
     test_idx = 0
     for links, n, topology in topology_generator:
-        # setup topology specific demand generator and iterate over 10 samples of demands
         demands_generator = get_demands_generator_scaled_snd(n, links.copy(), topology, SEED)
         for demands, demands_provider, sample_idx in demands_generator:
-            # perform each test instance on each algorithm
             for algorithm in algorithms:
                 setup = get_setup_dict(algorithm, demands, demands_provider, links, ilp_method, n, sample_idx, test_idx,
                                        topology, topology_provider, 1, mcf_method, SEED)
@@ -235,7 +223,6 @@ def snd_real_demands():
 
 
 def main():
-    """ For each figure used in the paper we perform a single test-run comprising each multiple test instances """
     # Evaluation Fig. 3
     print(f"Start {HIGHLIGHT}MCF Synthetic Demands - All Topologies{CEND}:")
     all_topologies_synthetic_demands()
