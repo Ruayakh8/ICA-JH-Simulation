@@ -88,10 +88,12 @@ def all_topologies_synthetic_demands():
     selected in the project proposal, using synthetic MCF MAXIMAL demands. """
 
     # algorithm settings
+    # Note: Baseline algorithms are commented out to reduce execution time.
+    # uncomment any of them to re-run the baseline comparisons.
     algorithms = [
-        "demand_first_waypoints",
-        "heur_ospf_weights",
-        "inverse_capacity",
+        # "demand_first_waypoints",
+        # "heur_ospf_weights",
+        # "inverse_capacity",
         # "sequential_combination", 
         "ica_joint_heuristic",
     ]
@@ -141,12 +143,14 @@ def all_topologies_synthetic_demands():
 def abilene_all_algorithms():
 
     # algorithm settings
+    # Note: Baseline algorithms are commented out to reduce execution time.
+    # uncomment any of them to re-run the baseline comparisons.
     algorithms = [  # ("algorithm_name", "ilp_method")
-        ("demand_first_waypoints", ""),
-        ("heur_ospf_weights", ""),
-        ("inverse_capacity", ""),
+        # ("demand_first_waypoints", ""),
+        # ("heur_ospf_weights", ""),
+        # ("inverse_capacity", ""),
         # ("sequential_combination", ""),
-        ("uniform_weights", ""),
+        # ("uniform_weights", ""),
         ("ica_joint_heuristic", ""),
         ("segment_ilp", "WEIGHTS"),
         ("segment_ilp", "WAYPOINTS"),
@@ -187,10 +191,12 @@ def abilene_all_algorithms():
 def snd_real_demands():
    
     # algorithm settings
+    # Note: Baseline algorithms are commented out to reduce execution time.
+    # uncomment any of them to re-run the baseline comparisons.
     algorithms = [
-        "demand_first_waypoints",
-        "heur_ospf_weights",
-        "inverse_capacity",
+        # "demand_first_waypoints",
+        # "heur_ospf_weights",
+        # "inverse_capacity",
         # "sequential_combination",
         "ica_joint_heuristic",
     ]
@@ -228,6 +234,7 @@ def main():
     all_topologies_synthetic_demands()
 
     # Evaluation Fig. 4
+    # To skip the time-consuming ILP evaluation, skip calling this function entirely.
     print(f"Start {HIGHLIGHT}MCF Synthetic Demands - All Algorithms - Abilene{CEND}:")
     abilene_all_algorithms()
 
